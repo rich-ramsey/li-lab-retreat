@@ -1,7 +1,6 @@
 # Data Science and Modelling Workshop
 
-Materials for a workshop on tidy data, visualisation, and multilevel modelling in R,
-using simulated education research data.
+Materials for a workshop on tidy data, visualisation, and multilevel modelling in R, using simulated education research data.
 
 ## Authors
 
