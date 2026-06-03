@@ -53,5 +53,4 @@ Data were simulated from a fitted model based on a real embodied learning study.
 
 ## License
 
-This work is licensed under a
-[Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).
+This work is licensed under a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).
