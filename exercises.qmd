@@ -1,0 +1,350 @@
+---
+title: "Data analysis exercises for the Learning and Instruction Lab retreat"
+format: html
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(lme4)
+library(broom.mixed)
+library(here)
+```
+
+## Before you start
+
+### How these exercises work
+
+Work in pairs.
+One person searches for help — using cheat sheets, documentation, or a generative AI tool.
+The other person types the code.
+Discuss together, but do not copy and paste.
+Writing code out by hand, even when you know the answer, is how it sticks.
+
+### Keyboard shortcuts
+
+| Action | Windows | Mac |
+|---|---|---|
+| Insert code chunk | Ctrl + Alt + I | Cmd + Option + I |
+| Insert pipe `|>` | Ctrl + Shift + M | Cmd + Shift + M |
+| Run current line or selection | Ctrl + Enter | Cmd + Enter |
+| Run current chunk | Ctrl + Shift + Enter | Cmd + Shift + Enter |
+
+### Key tidyverse verbs
+
+These are the main functions you will need today.
+If you get stuck, the [tidyverse cheat sheets](https://posit.co/resources/cheatsheets/) are a good first stop.
+
+| Function | Package | What it does |
+|---|---|---|
+| `pivot_longer()` | tidyr | Reshapes data from wide to long format |
+| `mutate()` | dplyr | Creates or modifies columns |
+| `filter()` | dplyr | Subsets rows by a condition |
+| `select()` | dplyr | Subsets columns |
+| `summarise()` | dplyr | Aggregates data, e.g. computing means |
+
+Note: you may see `group_by()` paired with `summarise()` in older code and cheat sheets.
+The modern approach uses the `.by` argument inside `summarise()` directly, which is what we use here.
+
+### Pipes and layers: the same idea twice
+
+Two bits of syntax will do a lot of work today.
+
+The **pipe** `|>` chains data through a sequence of steps.
+Each step takes the output of the previous one and passes it to the next function.
+Think of it as "and then":
+
+```r
+data |>
+  filter(group == "embodied") |>
+  summarise(mean_correct = mean(correct), .by = pid)
+```
+
+The **plus sign** `+` in ggplot2 works the same way, but for building plots.
+Each `+` adds a new layer on top of the previous one:
+
+```r
+ggplot(data, aes(x = group, y = correct)) +
+  geom_violin() +
+  geom_jitter() +
+  labs(x = "Group", y = "Proportion correct")
+```
+
+Same mental model, different context: one builds a data pipeline, one builds a plot.
+
+---
+
+## Simple data
+
+Load the simple dataset and create factors.
+This code is provided — run it and inspect the result before moving on.
+
+```{r}
+#| label: load-simple
+
+dat_simple_wide <- read_csv(
+  here("data", "sim_data_simple_wide.csv"),
+  show_col_types = FALSE
+) |>
+  mutate(
+    pid = factor(pid),
+    group = factor(group, levels = c("control", "embodied"))
+  )
+```
+
+Take a look at the data.
+
+```{r}
+#| label: glimpse-simple
+
+glimpse(dat_simple_wide)
+head(dat_simple_wide)
+```
+
+---
+
+## Exercise 1: Wide to long
+
+The item columns (`item_1`, `item_17`, etc.) each represent one observation of the same variable: whether a participant got an item correct or not.
+In tidy data, each variable has its own column.
+So these 8 columns should become two: one for item identity, one for the response.
+
+Your job is to reshape the data from wide to long format using `pivot_longer()`.
+The result should have one row per participant per item, with columns `pid`, `group`, `pre_score_z`, `item`, and `correct`.
+
+```{r}
+#| label: pivot-simple
+
+# pivot the item columns to long format
+# hint: use starts_with() to select the item columns
+# hint: names_to is the new column for item names, values_to is the new column for responses
+dat_simple_long <- dat_simple_wide |>
+  pivot_longer(
+    cols = ,
+    names_to = ,
+    values_to = 
+  )
+```
+
+Check the result looks right.
+
+```{r}
+#| label: check-pivot-simple
+
+# how many rows do you expect? 108 participants x 8 items = 864 rows
+# check with nrow() or glimpse() or head()
+
+```
+
+> **Reflect:** why is the long format better suited for plotting and modelling than the wide format?
+
+---
+
+## Exercise 2: Plot the data
+
+Plot the distribution of proportion correct by group.
+First summarise to one proportion correct value per participant, then plot.
+
+```{r}
+#| label: plot-simple
+
+# hint: summarise prop correct by c(pid, group) first, then pipe to ggplot
+# hint: use geom_violin() for the distribution and geom_jitter() for individual points
+
+dat_simple_long |>
+  summarise(prop_correct = , .by = c()) |>
+  ggplot(aes(x = , y = , fill = , colour = )) +
+  geom_violin() +
+  geom_jitter() +
+  labs(
+    x = ,
+    y = ,
+    title = 
+  )
+```
+
+> **Reflect:** does the plot suggest a group difference?
+> What are the limitations of this summary view?
+
+---
+
+## Exercise 3: Single-level model
+
+Fit a single-level logistic regression predicting `correct` from `group` and `pre_score_z`.
+This model ignores the fact that observations are nested within participants.
+
+Use `glm()` with `family = binomial`.
+Use `tidy()` from `broom.mixed` to view the output, with `conf.int = TRUE` to get confidence intervals.
+
+```{r}
+#| label: glm-simple
+
+# fit a single-level logistic regression
+# what goes on the left of ~?
+# what predictors go on the right?
+m_single <- glm(
+  ,
+  data = dat_simple_long,
+  family = binomial
+)
+
+tidy(m_single, conf.int = TRUE)
+```
+
+> **Reflect:** what does the coefficient for `group` tell you?
+> What is the model assuming about participants that might not be realistic?
+
+---
+
+## Exercise 4: Multilevel model
+
+Now fit a multilevel logistic regression using `glmer()` from the `lme4` package.
+Add a varying intercept for each participant.
+This allows each person to have their own baseline response probability, over and above the group average.
+
+A note on convergence: `lme4` fits models using maximum likelihood estimation, and multilevel models — especially with binary outcomes — frequently fail to converge.
+This is not a bug; it reflects a genuine limitation of the algorithm.
+Bayesian software such as `brms` fits the same models via a different algorithm that is more robust and does not have this problem, which is why many researchers prefer it for multilevel modelling.
+For the models we are fitting today, `lme4` should be fine.
+
+```{r}
+#| label: glmer-simple
+
+# fit a multilevel logistic regression with varying intercepts by pid
+# the fixed effects are the same as Exercise 3
+# hint: random effects are specified as (1 | grouping_variable)
+m_multi <- glmer(
+  ,
+  data = dat_simple_long,
+  family = binomial
+)
+
+tidy(m_multi, conf.int = TRUE)
+```
+
+> **Reflect:** how does the estimate for `group` change compared to the single-level model?
+> What is the varying intercept capturing?
+
+---
+
+## Full data (extension)
+
+If you have time, apply the same workflow to the more complex dataset.
+This data includes two test timepoints — post-test and a one-week delay — which motivates a richer model with varying slopes as well as varying intercepts.
+
+Load the full dataset and create factors.
+This code is provided — run it and inspect the result before moving on.
+
+```{r}
+#| label: load-full
+
+dat_full_wide <- read_csv(
+  here("data", "sim_data_full_wide.csv"),
+  show_col_types = FALSE
+) |>
+  mutate(
+    pid = factor(pid),
+    group = factor(group, levels = c("control", "embodied")),
+    test_time = factor(test_time, levels = c("post", "delay"))
+  )
+```
+
+Take a look at the data.
+
+```{r}
+#| label: glimpse-full
+
+glimpse(dat_full_wide)
+head(dat_full_wide)
+```
+
+---
+
+## Exercise 5: Wide to long (full data)
+
+The structure is the same as before, but now there is an additional column: `test_time`.
+Pivot the item columns to long format as you did in Exercise 1.
+
+```{r}
+#| label: pivot-full
+
+dat_full_long <- dat_full_wide |>
+  pivot_longer(
+    cols = ,
+    names_to = ,
+    values_to = 
+  )
+```
+
+---
+
+## Exercise 6: Plot the data (full data)
+
+Plot the distribution of proportion correct by group and test time.
+Summarise to one proportion correct value per participant per test time first.
+Use `geom_violin()` and `geom_jitter()` as before.
+Use `facet_wrap()` to show the two test times in separate panels.
+
+```{r}
+#| label: plot-full
+
+# hint: summarise by c(pid, group, test_time)
+# hint: facet_wrap(~ variable) splits the plot into panels by a variable
+
+dat_full_long |>
+  summarise(prop_correct = , .by = c()) |>
+  ggplot(aes(x = , y = , fill = , colour = )) +
+  geom_violin() +
+  geom_jitter() +
+  facet_wrap(~ ) +
+  labs(
+    x = ,
+    y = ,
+    title = 
+  )
+```
+
+---
+
+## Exercise 7: Single-level model (full data)
+
+Fit a single-level model predicting `correct` from `group`, `test_time`, their interaction, and `pre_score_z`.
+Use `*` to specify an interaction between two predictors.
+
+```{r}
+#| label: glm-full
+
+m_single_full <- glm(
+  ,
+  data = dat_full_long,
+  family = binomial
+)
+
+tidy(m_single_full, conf.int = TRUE)
+```
+
+---
+
+## Exercise 8: Multilevel model (full data)
+
+Fit a multilevel model with varying intercepts and varying slopes for `test_time` by participant.
+This allows each person to have their own trajectory across test times, not just their own baseline.
+
+```{r}
+#| label: glmer-full
+
+# hint: varying slopes are specified as (1 + slope_variable | grouping_variable)
+m_multi_full <- glmer(
+  ,
+  data = dat_full_long,
+  family = binomial
+)
+
+tidy(m_multi_full, conf.int = TRUE)
+```
+
+> **Reflect:** what does a varying slope for `test_time` capture that a varying intercept alone does not?
+> Look at the random effects output — is there meaningful variability in slopes across participants?
