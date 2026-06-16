@@ -1,0 +1,75 @@
+---
+title: "Hints"
+format: html
+---
+
+Hints are organised by exercise.
+Try to solve each exercise before looking here.
+If you are stuck, discuss with your partner first, then check the relevant section.
+
+---
+
+## Exercise 1: Wide to long
+
+- Use `starts_with("item_")` inside `cols` to select all item columns at once.
+- `names_to` defines the name of the new column that will hold the item names.
+- `values_to` defines the name of the new column that will hold the responses.
+
+---
+
+## Exercise 2: Plot the data
+
+- Before plotting, summarise to one proportion correct value per participant using `mean(correct)`, grouped by `c(pid, group)`.
+- Pipe the summarised data directly into `ggplot()`.
+- Use `geom_violin()` for the distribution shape and `geom_jitter()` for individual data points.
+
+---
+
+## Exercise 3: Single-level model
+
+- The outcome variable goes on the left of `~`, the predictors on the right.
+- You have two predictors: `group` and `pre_score_z`.
+- `family = binomial` is already provided — this tells `glm()` to fit a logistic regression.
+
+---
+
+## Exercise 4: Multilevel model
+
+- The fixed effects structure is the same as Exercise 3.
+- Random effects are added inside parentheses: `(1 | grouping_variable)`.
+- Think about what the grouping variable is — what are observations nested within?
+
+---
+
+## Extension exercises
+
+---
+
+## Exercise 5: Wide to long (full data)
+
+- The pivot works exactly as in Exercise 1.
+- The additional `test_time` column does not need to be pivoted — it stays as-is.
+
+---
+
+## Exercise 6: Plot the data (full data)
+
+- Summarise by `c(pid, group, test_time)` to get one value per person per timepoint.
+- Use `facet_wrap(~ variable)` to split the plot into panels by a variable.
+- The geoms are the same as Exercise 2.
+
+---
+
+## Exercise 7: Single-level model (full data)
+
+- You have three predictors: `group`, `test_time`, and `pre_score_z`.
+- Think about which predictors should interact with each other and which should not.
+- Use `*` between two predictors to fit their main effects and interaction in one step.
+
+---
+
+## Exercise 8: Multilevel model (full data)
+
+- The fixed effects structure is the same as Exercise 7.
+- A varying slope for `test_time` is specified as `(1 + test_time | pid)`.
+- Think about what a varying slope means: each participant has their own trajectory over time.
