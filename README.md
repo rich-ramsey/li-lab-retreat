@@ -2,7 +2,7 @@
 
 Materials for a workshop on tidy data, visualisation, and multilevel modelling in R, using simulated education research data.
 
-## Authors
+## Authors 
 
 Rich & Christian
 
@@ -12,7 +12,7 @@ The workshop covers three core ideas:
 
 1. **FAIR data principles** — structuring your project so that sharing and reproducibility are defaults, not afterthoughts.
 2. **Tidy data** — why long format matters, and how to get there with `tidyr`.
-3. **Multilevel modelling** — why nested data structures call for varying effects, and how to fit them with `lme4` and `brms`.
+3. **Multilevel modelling** — why nested data structures call for varying effects, and how to fit them with `lme4`.
 
 The exercises use simulated data from an embodied learning study in which participants
 completed a knowledge test before and after a learning intervention (control vs. embodied condition).
@@ -22,6 +22,7 @@ completed a knowledge test before and after a learning intervention (control vs.
 ```
 li-lab-retreat/
   exercises.qmd        # Main exercise document
+  hints.qmd            # Hints organised by exercise — check here if you are stuck
   data_dictionary.md   # Variable descriptions for both datasets
   data/
     sim_data_simple_wide.csv   # Post-test data only, wide format
@@ -30,9 +31,10 @@ li-lab-retreat/
 
 ## Getting started
 
-1. Open `workshop.Rproj` in RStudio.
+1. Open `li-lab-retreat.Rproj` in RStudio.
 2. Install the required packages (see below).
 3. Open `exercises.qmd` and work through the sections.
+4. If you get stuck, open `hints.qmd` for some helpful tips.
 
 ## Required packages
 
