@@ -22,7 +22,7 @@ Work in pairs.
 One person searches for help — using cheat sheets, documentation, or a generative AI tool.
 The other person types the code.
 Discuss together, but do not copy and paste.
-Writing code out by hand, even when you know the answer, is how it sticks.
+Writing code out by hand is how it sticks.
 
 ### Keyboard shortcuts
 
@@ -53,7 +53,7 @@ The modern approach uses the `.by` argument inside `summarise()` directly, which
 
 Two bits of syntax will do a lot of work today.
 
-The **pipe** `|>` chains data through a sequence of steps.
+The **pipe** `|>` chains data through a sequence of steps (in older versions the pipe looks like this `%>%`).
 Each step takes the output of the previous one and passes it to the next function.
 Think of it as "and then":
 
@@ -73,7 +73,7 @@ ggplot(data, aes(x = group, y = correct)) +
   labs(x = "Group", y = "Proportion correct")
 ```
 
-Same mental model, different context: one builds a data pipeline, one builds a plot.
+Same idea, different context: one builds a data pipeline, one builds a plot.
 
 ---
 
@@ -118,9 +118,6 @@ The result should have one row per participant per item, with columns `pid`, `gr
 ```{r}
 #| label: pivot-simple
 
-# pivot the item columns to long format
-# hint: use starts_with() to select the item columns
-# hint: names_to is the new column for item names, values_to is the new column for responses
 dat_simple_long <- dat_simple_wide |>
   pivot_longer(
     cols = ,
@@ -151,9 +148,6 @@ First summarise to one proportion correct value per participant, then plot.
 ```{r}
 #| label: plot-simple
 
-# hint: summarise prop correct by c(pid, group) first, then pipe to ggplot
-# hint: use geom_violin() for the distribution and geom_jitter() for individual points
-
 dat_simple_long |>
   summarise(prop_correct = , .by = c()) |>
   ggplot(aes(x = , y = , fill = , colour = )) +
@@ -169,6 +163,8 @@ dat_simple_long |>
 > **Reflect:** does the plot suggest a group difference?
 > What are the limitations of this summary view?
 
+> **Owl task:** Can you make the individual data points more visible and arrange them more meaningfully?
+
 ---
 
 ## Exercise 3: Single-level model
@@ -182,9 +178,6 @@ Use `tidy()` from `broom.mixed` to view the output, with `conf.int = TRUE` to ge
 ```{r}
 #| label: glm-simple
 
-# fit a single-level logistic regression
-# what goes on the left of ~?
-# what predictors go on the right?
 m_single <- glm(
   ,
   data = dat_simple_long,
@@ -213,9 +206,6 @@ For the models we are fitting today, `lme4` should be fine.
 ```{r}
 #| label: glmer-simple
 
-# fit a multilevel logistic regression with varying intercepts by pid
-# the fixed effects are the same as Exercise 3
-# hint: random effects are specified as (1 | grouping_variable)
 m_multi <- glmer(
   ,
   data = dat_simple_long,
@@ -291,9 +281,6 @@ Use `facet_wrap()` to show the two test times in separate panels.
 ```{r}
 #| label: plot-full
 
-# hint: summarise by c(pid, group, test_time)
-# hint: facet_wrap(~ variable) splits the plot into panels by a variable
-
 dat_full_long |>
   summarise(prop_correct = , .by = c()) |>
   ggplot(aes(x = , y = , fill = , colour = )) +
@@ -311,7 +298,8 @@ dat_full_long |>
 
 ## Exercise 7: Single-level model (full data)
 
-Fit a single-level model predicting `correct` from `group`, `test_time`, their interaction, and `pre_score_z`.
+Fit a single-level model predicting `correct` from `group`, `test_time`, and `pre_score_z`.
+Which predictors should have main effects, which should have interactions with other predictors?
 Use `*` to specify an interaction between two predictors.
 
 ```{r}
@@ -336,7 +324,6 @@ This allows each person to have their own trajectory across test times, not just
 ```{r}
 #| label: glmer-full
 
-# hint: varying slopes are specified as (1 + slope_variable | grouping_variable)
 m_multi_full <- glmer(
   ,
   data = dat_full_long,
