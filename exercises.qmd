@@ -190,6 +190,7 @@ tidy(m_single, conf.int = TRUE)
 > **Reflect:** what does the coefficient for `group` tell you?
 > What is the model assuming about participants that might not be realistic?
 
+> **Owl task:** Does the data fulfil the statistical assumptions required for linear regression models?
 ---
 
 ## Exercise 4: Multilevel model
@@ -220,7 +221,7 @@ tidy(m_multi, conf.int = TRUE)
 
 ---
 
-## Full data (extension)
+## Owl task: Full data (extension)
 
 If you have time, apply the same workflow to the more complex dataset.
 This data includes two test timepoints — post-test and a one-week delay — which motivates a richer model with varying slopes as well as varying intercepts.
